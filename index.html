@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malla Interactiva Medicina Veterinaria</title>
+  <style>
+    :root {
+      --pastel1: #ffcc99;
+      --pastel2: #ffcccc;
+      --pastel3: #ff99cc;
+      --pastel4: #ffccff;
+      --pastel5: #cc99ff;
+      --pastel6: #ccccff;
+      --pastel7: #99ccff;
+      --pastel8: #ccffff;
+      --pastel9: #99ffcc;
+      --pastel10: #ccffcc;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://images.unsplash.com/photo-1579017984851-d173d04f8c7d?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #ffffff;
+      text-shadow: 1px 1px 3px #000;
+      margin-bottom: 30px;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls button {
+      margin: 0 5px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #ffffffcc;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+      transition: background-color 0.2s;
+    }
+    .controls button:hover {
+      background-color: #f0f0f0;
+    }
+    .wrapper {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      overflow-x: auto;
+    }
+    .semestre {
+      min-width: 220px;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+      color: #333;
+      background-blend-mode: multiply;
+    }
+    .semestre:nth-child(10n+1) { background: var(--pastel1); }
+    .semestre:nth-child(10n+2) { background: var(--pastel2); }
+    .semestre:nth-child(10n+3) { background: var(--pastel3); }
+    .semestre:nth-child(10n+4) { background: var(--pastel4); }
+    .semestre:nth-child(10n+5) { background: var(--pastel5); }
+    .semestre:nth-child(10n+6) { background: var(--pastel6); }
+    .semestre:nth-child(10n+7) { background: var(--pastel7); }
+    .semestre:nth-child(10n+8) { background: var(--pastel8); }
+    .semestre:nth-child(10n+9) { background: var(--pastel9); }
+    .semestre:nth-child(10n+10) { background: var(--pastel10); }
+
+    .semestre h2 {
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 10px;
+      color: #37474f;
+    }
+    .materia {
+      margin: 6px 0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.6);
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    .materia:hover {
+      background: rgba(0,0,0,0.1);
+    }
+    .materia.bloqueada {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .materia.completada::after {
+      content: '';
+      position: absolute;
+      left: 10%;
+      top: 50%;
+      width: 80%;
+      height: 2px;
+      background: #2e7d32;
+      transform: translateY(-50%) rotate(-20deg);
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva - Medicina Veterinaria</h1>
+  <div class="controls">
+    <button onclick="marcarTodo()">✅ Marcar todo</button>
+    <button onclick="reiniciarTodo()">🔄 Reiniciar todo</button>
+  </div>
+  <div class="wrapper" id="contenedor"></div>
+
+  <script>
+    const materias = {
+      '1.1': { nombre: '🧪 Biofísica y bioestadística aplicada a la veterinaria' },
+      '1.2': { nombre: '🧫 Química, bioquímica y biología celular' },
+      '1.3': { nombre: '🦎 Zoología y botánica aplicada a la veterinaria' },
+      '1.4': { nombre: '🧍 Anatomía y Embriología I' },
+      '1.5': { nombre: '🐾 Bienestar animal, etnología y etología' },
+      '1.6': { nombre: '🗣️ Expresión oral y escrita' },
+      '1.7': { nombre: '📚 Filosofía institucional uniagrarista' },
+      '2.1': { nombre: '🧬 Bioquímica y biología molecular', prereq: ['1.2'] },
+      '2.2': { nombre: '👶 Genética' },
+      '2.3': { nombre: '🔬 Histología veterinaria', prereq: ['1.4'] },
+      '2.4': { nombre: '🦴 Anatomía y embriología II', prereq: ['1.4'] },
+      '2.5': { nombre: '📊 TGS' },
+      '2.6': { nombre: '🫀 Fisiología veterinaria I' },
+      '2.7': { nombre: '📝 Metodología de la investigación' },
+      '3.1': { nombre: '🧠 Fisiología veterinaria II', prereq: ['2.6'] },
+      '3.2': { nombre: '🦠 Bacteriología y micología' },
+      '3.3': { nombre: '🌱 Mejoramiento genético', prereq: ['2.2'] },
+      '3.4': { nombre: '💉 Inmunología' },
+      '3.5': { nombre: '🪱 Parasitología' },
+      '3.6': { nombre: '🌟 Electiva interdisciplinar I “formación integral”' },
+      '3.7': { nombre: '🌍 Electiva socio humanística I “ecoturismo”' },
+      '4.1': { nombre: '🧬 Virología y priones' },
+      '4.2': { nombre: '🥛 Microbiología alimentaria', prereq: ['3.2'] },
+      '4.3': { nombre: '🐮 TECA' },
+      '4.4': { nombre: '🍽️ Nutrición animal monogástricos' },
+      '4.5': { nombre: '🐖 SPP', prereq: ['2.5'] },
+      '4.6': { nombre: '🌿 Gestión ambiental' },
+      '4.7': { nombre: '🏛️ Electiva sociohumanística II “historia de la cultura”' },
+      '5.1': { nombre: '🧫 Patología general', prereq: ['2.3', '2.4', '3.1'] },
+      '5.2': { nombre: '🩺 Propedéutica clínica', prereq: ['2.4', '3.1'] },
+      '5.3': { nombre: '🐣 Fisiología y biotecnología de reproducción', prereq: ['2.4', '3.1'] },
+      '5.4': { nombre: '🌾 Nutrición animal poligástricos' },
+      '5.5': { nombre: '🐑 SPA', prereq: ['4.5'] },
+      '5.6': { nombre: '📘 Electiva interdisciplinar II' },
+      '5.7': { nombre: '🚜 Desarrollo rural' },
+      '6.1': { nombre: '🫁 Patología sistémica', prereq: ['5.1'] },
+      '6.2': { nombre: '🧟 Enfermedades parasitarias', prereq: ['3.5', '5.1'] },
+      '6.3': { nombre: '💊 Farmacología y farmacia' },
+      '6.4': { nombre: '🤰 Reproducción y obstetricia', prereq: ['5.3'] },
+      '6.5': { nombre: '🔍 Electiva profundización I' },
+      '6.6': { nombre: '🔬 Electiva interdisciplinaria II' },
+      '6.7': { nombre: '📜 Constitución política de Colombia' },
+      '7.1': { nombre: '🧪 Patología correlación', prereq: ['6.1'] },
+      '7.2': { nombre: '🩻 Radiología', prereq: ['6.1'] },
+      '7.3': { nombre: '🐔 Medicina y producción aviar', prereq: ['6.1'] },
+      '7.4': { nombre: '🥩 Higiene y seguridad alimentaria I', prereq: ['4.2'] },
+      '7.5': { nombre: '📗 Electiva profundización II' },
+      '7.6': { nombre: '📙 Electiva profundización III' },
+      '7.7': { nombre: '💡 Emprendimiento e innovación' },
+      '8.1': { nombre: '💉 Farmacología clínica', prereq: ['6.3'] },
+      '8.2': { nombre: '🥫 Higiene y seguridad alimentaria II', prereq: ['7.4'] },
+      '8.3': { nombre: '🔪 Cirugía general y anestesia', prereq: ['7.1'] },
+      '8.4': { nombre: '🧾 Patología médica I', prereq: ['7.1'] },
+      '8.5': { nombre: '📈 Epidemiología' },
+      '8.6': { nombre: '🛡️ Medicina preventiva', prereq: ['7.1'] },
+      '8.7': { nombre: '☠️ Toxicología', prereq: ['6.3'] },
+      '9.1': { nombre: '🧾 Patología médica', prereq: ['8.4'] },
+      '9.2': { nombre: '✂️ Cirugía especial', prereq: ['8.3'] },
+      '9.3': { nombre: '🧼 Salud pública veterinaria', prereq: ['8.6'] },
+      '9.4': { nombre: '⚖️ Medicina legal y legislación' },
+      '9.5': { nombre: '📋 SGC', prereq: ['8.2'] },
+      '9.6': { nombre: '🧭 Deontología' },
+      '9.7': { nombre: '📒 Electiva de profundización IV' },
+      '10.1': { nombre: '🏥 Práctica externa clínica' },
+      '10.2': { nombre: '🐄 Práctica externa producción animal' },
+      '10.3': { nombre: '🥩 Práctica externa salud pública e inspección alimentaria' },
+      '10.4': { nombre: '🎓 Proyecto de grado' },
+    };
+
+    const contenedor = document.getElementById('contenedor');
+
+    function crearSemestre(num) {
+      const div = document.createElement('div');
+      div.className = 'semestre';
+      div.innerHTML = `<h2>Semestre ${num}</h2>`;
+      for (const clave in materias) {
+        if (clave.startsWith(num + '.')) {
+          const mat = materias[clave];
+          const item = document.createElement('div');
+          item.className = 'materia';
+          item.textContent = mat.nombre;
+          item.dataset.clave = clave;
+          if (mat.prereq) item.classList.add('bloqueada');
+          item.addEventListener('click', () => {
+            if (!item.classList.contains('bloqueada')) {
+              item.classList.toggle('completada');
+              verificarBloqueos();
+            }
+          });
+          div.appendChild(item);
+        }
+      }
+      contenedor.appendChild(div);
+    }
+
+    function verificarBloqueos() {
+      for (const clave in materias) {
+        const mat = materias[clave];
+        const item = document.querySelector(`.materia[data-clave="${clave}"]`);
+        if (mat.prereq) {
+          const habilitada = mat.prereq.every(pr => document.querySelector(`.materia[data-clave="${pr}"]`)?.classList.contains('completada'));
+          item.classList.toggle('bloqueada', !habilitada);
+        }
+      }
+    }
+
+    function marcarTodo() {
+      document.querySelectorAll('.materia:not(.bloqueada)').forEach(m => m.classList.add('completada'));
+      verificarBloqueos();
+    }
+
+    function reiniciarTodo() {
+      document.querySelectorAll('.materia').forEach(m => m.classList.remove('completada'));
+      verificarBloqueos();
+    }
+
+    for (let i = 1; i <= 10; i++) crearSemestre(i);
+    verificarBloqueos();
+  </script>
+</body>
+</html>
